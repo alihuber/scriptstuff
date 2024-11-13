@@ -1,5 +1,5 @@
-# even more primitive script that changes a given line of text in a given file name
-# could be a awk script, but meh
+# the most primitive script that adds a given line of text into a file at given line num
+# blatantly ignoring sed.. just use it in tests 🤪
 
 from pathlib import Path
 import os
@@ -14,12 +14,12 @@ parser.add_argument(
     help="files in which the string should be replaced",
 )
 parser.add_argument(
-    "search_string",
-    help="search string, string to replace",
+    "string_to_add",
+    help="string to add",
 )
 parser.add_argument(
-    "replacement_string",
-    help="replacement string",
+    "line_number",
+    help="line number to add string (below)",
 )
 parser.add_argument(
     "--commit_message",
@@ -41,9 +41,9 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-search_string = args.search_string
-replacement_string = args.replacement_string
 filename = args.filename
+line_number = args.line_number
+string_to_add = args.string_to_add
 commit_message = args.commit_message
 dry_run = args.dryrun
 push = args.push
@@ -54,20 +54,22 @@ found_files = Path(".").rglob(filename)
 filepaths = [os.path.abspath(path) for path in found_files]
 filtered_filepaths = [path for path in filepaths if "node_modules" not in path]
 
-def lines_that_contain(string, file_path):
-    return [line for line in file_path if string in line]
+def lines_in_file(file_path):
+    return [line for line in file_path]
 
 
-def replace(file_path, pattern, replacement):
-    print(f"will replace {pattern} with {replacement} in file {str(file_path)} \n")
+def add_line(file_path, new_line, line_number):
+    print(f"will add '{new_line}' after line {line_number} in file {str(file_path)} \n")
     if dry_run:
         return
     # Create temp file
     file_handle, abs_path = mkstemp()
     with os.fdopen(file_handle, "w") as new_file:
         with open(file_path) as old_file:
-            for line in old_file:
-                new_file.write(line.replace(pattern, replacement))
+            file_lines = old_file.readlines()
+            file_lines.insert(int(line_number)+1, f"{new_line}\n")
+            for line in file_lines:
+                new_file.write(line)
     # Copy the file permissions from the old file to the new file
     copymode(file_path, abs_path)
     # Remove original file
@@ -75,18 +77,12 @@ def replace(file_path, pattern, replacement):
     # Move new file
     move(abs_path, file_path)
 
-def change_file_line(replacement_string, file_path, old_line):
+for file_path in filtered_filepaths:
     try:
-        replace(file_path, old_line, f"{replacement_string}\n")
+      add_line(file_path, string_to_add, line_number)
     except Exception as e:
         print(f"error: could not alter file {file_path}")
         print(e)
-
-
-for file_path in filtered_filepaths:
-    with open(file_path, "r") as fp:
-        for old_line in lines_that_contain(search_string, fp):
-            change_file_line(replacement_string, file_path, old_line)
 
 
 commands = [

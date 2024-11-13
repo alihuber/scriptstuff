@@ -89,7 +89,7 @@ def change_package_json_line(version_to_set, file_path, old_line):
     new_line = " ".join(new_version_line_ary)
     try:
         replace(file_path, old_line, new_line)
-    except exception as e:
+    except Exception as e:
         print(f"error: could not alter file {file_path}")
         print(e)
 
