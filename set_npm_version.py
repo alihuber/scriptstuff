@@ -19,14 +19,19 @@ parser.add_argument(
     help="version to set the npm package to",
 )
 parser.add_argument(
-    "commit_message",
+    "--commit_message",
     help='commit message, between ""',
+    action="store_true",
+    default="",
 )
 parser.add_argument(
     "--dryrun",
     help="display changes only, do not alter files",
     action="store_true",
     default=False,
+)
+parser.add_argument(
+    "--commit", help="do also a git commit", action="store_true", default=False
 )
 parser.add_argument(
     "--push", help="do also a git push", action="store_true", default=False
@@ -38,6 +43,7 @@ version_to_set = args.version_to_set
 commit_message = args.commit_message
 dry_run = args.dryrun
 push = args.push
+commit = args.commit
 
 filename = "package.json"
 
@@ -108,7 +114,7 @@ def exec_process(command, dirname):
         print(f"output {" ".join(command)}: {process.stdout.read1().decode('utf-8')}")
 
 
-if not dry_run:
+if not dry_run and commit and commit_message:
     for file_path in filtered_filepaths:
         dirname = os.path.dirname(file_path)
         for command in commands:
