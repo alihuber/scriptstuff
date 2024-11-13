@@ -6,14 +6,14 @@ def exec_process(command):
     ) as process:
         print(f"output {" ".join(command)}: {process.stdout.read1().decode('utf-8')}")
 
-def test_set_line_in_file():
+def test_replace_line_in_file():
     with open("./tests/fixtures/project1/Dockerfile", "r") as myfile:
         assert 'FROM node:10-alpine' in myfile.read()
     with open("./tests/fixtures/project2/Dockerfile", "r") as myfile:
         assert 'FROM node:10-alpine' in myfile.read()
 
     commands = [
-        ["python3", "set_line_in_file.py", "Dockerfile", "FROM node:10-alpine", "FROM node:22-alpine"],
+        ["python3", "replace_line_in_file.py", "Dockerfile", "FROM node:10-alpine", "FROM node:22-alpine"],
     ]
 
     for command in commands:
@@ -25,7 +25,7 @@ def test_set_line_in_file():
         assert 'FROM node:22-alpine' in myfile.read()
 
     cleanup_commands = [
-        ["python3", "set_line_in_file.py", "Dockerfile", "FROM node:22-alpine", "FROM node:10-alpine"],
+        ["python3", "replace_line_in_file.py", "Dockerfile", "FROM node:22-alpine", "FROM node:10-alpine"],
     ]
 
     for command in cleanup_commands:
