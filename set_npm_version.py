@@ -45,6 +45,10 @@ dry_run = args.dryrun
 push = args.push
 commit = args.commit
 
+if commit and not commit_message:
+    print("Can't commit without commit message, aborting..")
+    exit(1)
+
 filename = "package.json"
 
 found_files = Path(".").rglob(filename)

@@ -49,6 +49,9 @@ dry_run = args.dryrun
 push = args.push
 commit = args.commit
 
+if commit and not commit_message:
+    print("Can't commit without commit message, aborting..")
+    exit(1)
 
 found_files = Path(".").rglob(filename)
 filepaths = [os.path.abspath(path) for path in found_files]
